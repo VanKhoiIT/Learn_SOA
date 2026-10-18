@@ -22,7 +22,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        // 1. Cho phép truy cập tự do vào giao diện Web Demo, Swagger UI và H2 Console
+        // Cho phep truy cap tu do vao cac duong dan nay
         if (path.equals("/") ||
             path.equals("/index.html") ||
             path.startsWith("/static") ||
@@ -39,25 +39,23 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 2. Kiểm tra Header Authorization cho các API nghiệp vụ (/products, ...)
+        // Kiem tra Header Authorization
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            sendUnauthorizedError(response,
-                    "Ban can cung cap Token hop le tu Auth Service (Buoi 2) qua Header Authorization: Bearer <token>");
+            sendUnauthorizedError(response, "Loi: Ban can truyen Token hop le qua Header Authorization: Bearer <token>");
             return;
         }
 
         String token = authHeader.substring(7).trim();
         if (token.isEmpty()) {
-            sendUnauthorizedError(response, "Token rong! Vui long truyen Token hop le.");
+            sendUnauthorizedError(response, "Loi: Token khong duoc de trong!");
             return;
         }
 
-        // 3. Xác thực Token qua Auth Service Buổi 2 (SOA Inter-Service Call)
+        // Xac thuc token qua Auth Service buoi 2
         AuthServiceCommunicator.AuthResult authResult = authServiceCommunicator.verifyTokenWithAuthService(token);
 
         if (authResult.isValid()) {
-            // Lưu thông tin người dùng vào thuộc tính của request để controller có thể sử dụng nếu cần
             request.setAttribute("authenticatedUser", authResult.getUsername());
             filterChain.doFilter(request, response);
         } else {

@@ -1,9 +1,7 @@
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8
 
-Write-Host "=================================================================" -ForegroundColor Cyan
-Write-Host "   BẮT ĐẦU CHUỖI KIỂM THỬ TỰ ĐỘNG BÀI THỰC HÀNH SỐ 3 (SOA)      " -ForegroundColor Cyan
-Write-Host "=================================================================" -ForegroundColor Cyan
+Write-Host "=== KIEM TRA API PRODUCT SERVICE (BUOI 3) ===" -ForegroundColor Cyan
 
 # -------------------------------------------------------------
 # TEST 1: Kiểm tra bảo vệ API (Chưa truyền Token)
@@ -134,6 +132,4 @@ try {
     Write-Host "-> Thông báo lỗi: $($_.ErrorDetails.Message)"
 }
 
-Write-Host "`n=================================================================" -ForegroundColor Cyan
-Write-Host "   TẤT CẢ 10/10 KỊCH BẢN KIỂM THỬ ĐÃ VƯỢT QUA XUẤT SẮC!         " -ForegroundColor Cyan
-Write-Host "=================================================================" -ForegroundColor Cyan
+Write-Host "`n=== HOAN THANH KIEM TRA: TAT CA TEST CASE DEU THANH CONG! ===" -ForegroundColor Green

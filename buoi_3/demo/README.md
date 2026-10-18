@@ -1,55 +1,53 @@
-# HƯỚNG DẪN THỰC HIỆN VÀ CHỤP ẢNH MINH CHỨNG - BÀI THỰC HÀNH SỐ 3
-## DỊCH VỤ QUẢN LÝ SẢN PHẨM (PRODUCT MANAGEMENT SERVICE) - KIẾN TRÚC SOA
+# BÀI THỰC HÀNH SỐ 3: DỊCH VỤ QUẢN LÝ SẢN PHẨM (PRODUCT SERVICE)
 
-> **Thư mục dự án:** `buoi_3/demo/`  
-> **Thư mục lưu ảnh minh chứng:** `buoi_3/demo/screenshot/`  
-> **Phím tắt chụp ảnh trên Windows:** `Windows + Shift + S`
-
----
-
-## I. TỔNG QUAN KIẾN TRÚC SOA (SERVICE-ORIENTED ARCHITECTURE)
-
-Dịch vụ Quản lý Sản phẩm (Product Management Service) được thiết kế và triển khai tuân thủ đầy đủ các nguyên tắc cốt lõi của **Kiến trúc Hướng dịch vụ (SOA)**:
-1. **Dịch vụ độc lập (Loose Coupling & Autonomy):** Chạy trên một tiến trình và cổng riêng biệt: `http://localhost:8081` (khác với Auth Service ở Buổi 2 chạy trên cổng `8080`).
-2. **Cơ sở dữ liệu độc lập (Database-per-Service):** Dịch vụ sở hữu cơ sở dữ liệu riêng biệt (`productdb` thông qua H2 Database file-based hoặc MySQL), không dùng chung bảng hay truy vấn trực tiếp bảng của service khác.
-3. **Giao tiếp liên dịch vụ (Inter-Service Communication):** Cơ chế xác thực sử dụng Bearer JWT Token được sinh bởi **Auth Service Buổi 2** (`POST http://localhost:8080/login`). Khi nhận request, Product Service sẽ xác thực token qua endpoint `GET http://localhost:8080/auth`.
-4. **Chuẩn hóa giao diện RESTful API:** Cung cấp đầy đủ 5 phương thức CRUD chuẩn RESTful và tài liệu trực quan hóa bằng Swagger OpenAPI UI tại `http://localhost:8081/swagger-ui/index.html`.
+## 1. Thông tin dịch vụ
+- **Cổng hoạt động (Port):** `8081` (chạy độc lập với Auth Service buổi 2 ở cổng `8080`).
+- **Cơ sở dữ liệu:** H2 Database dạng file lưu tại `./data/productdb`.
+- **H2 Console:** `http://localhost:8081/h2-console` (JDBC URL: `jdbc:h2:file:./data/productdb`, User: `sa`, Pass để trống).
+- **Swagger UI:** `http://localhost:8081/swagger-ui/index.html`.
+- **Xác thực:** Dùng Token JWT sinh từ API `/login` của Buổi 2 (cổng 8080).
 
 ---
 
-## II. THÔNG TIN CẤU TRÚC DỮ LIỆU BẢNG `products`
-
-| Tên cột | Kiểu dữ liệu | Mô tả |
-| :--- | :--- | :--- |
-| `id` | `INT / BIGINT (PRIMARY KEY, AUTO_INCREMENT)` | ID duy nhất định danh sản phẩm |
-| `name` | `VARCHAR(255) (NOT NULL)` | Tên sản phẩm |
-| `description` | `TEXT` | Mô tả chi tiết sản phẩm |
-| `price` | `DECIMAL(10, 2)` | Giá sản phẩm |
-| `quantity` | `INT` | Số lượng sản phẩm còn trong kho |
-| `created_at` | `TIMESTAMP` | Ngày giờ sản phẩm được tạo ban đầu |
-| `updated_at` | `TIMESTAMP` | Ngày giờ sản phẩm được cập nhật gần nhất |
+## 2. Bảng dữ liệu sản phẩm (products)
+- `id`: INT (Primary Key, Auto Increment)
+- `name`: VARCHAR(255)
+- `description`: TEXT
+- `price`: DECIMAL(10, 2)
+- `quantity`: INT
+- `created_at`: TIMESTAMP
+- `updated_at`: TIMESTAMP
 
 ---
 
-## III. HƯỚNG DẪN KHỞI ĐỘNG HỆ THỐNG
+## 3. Cách khởi chạy hệ thống
 
-Để hệ thống hoạt động đầy đủ cả 2 dịch vụ giao tiếp với nhau:
-
-### Bước 1: Khởi động Auth Service (Buổi 2 - Cổng 8080)
-Mở Terminal thứ nhất trong VS Code:
+### Bước 1: Chạy Auth Service (Buổi 2 - Cổng 8080)
+Mở Terminal 1:
 ```powershell
 cd "d:\MY STUDY\HK1_4\SOA\buoi_2\demo"
 .\mvnw.cmd spring-boot:run
 ```
-*Dịch vụ Auth Service sẽ sẵn sàng tại `http://localhost:8080`.*
 
-### Bước 2: Khởi động Product Service (Buổi 3 - Cổng 8081)
-Mở Terminal thứ hai trong VS Code:
+### Bước 2: Chạy Product Service (Buổi 3 - Cổng 8081)
+Mở Terminal 2:
 ```powershell
 cd "d:\MY STUDY\HK1_4\SOA\buoi_3\demo"
 .\mvnw.cmd spring-boot:run
 ```
-*Dịch vụ Product Service sẽ sẵn sàng tại `http://localhost:8081`.*
 
 ---
 
+## 4. Danh sách các API trong bài làm
+- `GET /products`: Lấy danh sách tất cả sản phẩm.
+- `GET /products/{id}`: Xem chi tiết một sản phẩm theo ID.
+- `POST /products`: Thêm mới một sản phẩm.
+- `PUT /products/{id}`: Cập nhật thông tin sản phẩm theo ID.
+- `DELETE /products/{id}`: Xóa một sản phẩm theo ID.
+
+---
+
+## 5. Hướng dẫn test nhanh trên Swagger UI
+1. Mở Swagger Buổi 2: `http://localhost:8080/swagger-ui/index.html` $\rightarrow$ gọi `POST /login` với `{ "userName": "admin", "password": "123456" }` để lấy Token.
+2. Mở Swagger Buổi 3: `http://localhost:8081/swagger-ui/index.html` $\rightarrow$ bấm nút **Authorize 🔓** ở góc trên bên phải $\rightarrow$ dán Token vào $\rightarrow$ bấm Authorize.
+3. Thực hiện test các API `GET`, `POST`, `PUT`, `DELETE` trên giao diện Swagger.
