@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOA Buổi 3 - Dịch vụ Quản lý Sản phẩm (Live Demo Dashboard)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0e17;
+      --bg-secondary: #121826;
+      --bg-card: rgba(26, 35, 52, 0.7);
+      --border-card: rgba(255, 255, 255, 0.08);
+      --accent-cyan: #06b6d4;
+      --accent-blue: #3b82f6;
+      --accent-purple: #8b5cf6;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-red: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: radial-gradient(circle at 20% 20%, #1e1b4b 0%, var(--bg-primary) 50%, #030712 100%);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      padding: 24px;
+      line-height: 1.5;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.35); }
+
+    .header-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 24px;
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-title h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #38bdf8, #818cf8, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .badge-service {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-online {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulseDot 2s infinite;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 8px 14px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-card);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-link:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Controls Section */
+    .controls-panel {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .control-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.35);
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-main);
+      border: 1px solid var(--border-card);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    /* Grid Layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1.3fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 1024px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border-card);
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Stepper List */
+    .steps-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid transparent;
+      transition: all 0.25s ease;
+    }
+
+    .step-item.active {
+      background: rgba(59, 130, 246, 0.12);
+      border-color: rgba(59, 130, 246, 0.4);
+      transform: translateX(4px);
+    }
+
+    .step-item.completed {
+      background: rgba(16, 185, 129, 0.08);
+      border-color: rgba(16, 185, 129, 0.25);
+    }
+
+    .step-number {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .step-item.active .step-number {
+      background: var(--accent-blue);
+      color: white;
+      box-shadow: 0 0 10px var(--accent-blue);
+    }
+
+    .step-item.completed .step-number {
+      background: var(--accent-green);
+      color: white;
+    }
+
+    .step-content {
+      flex: 1;
+    }
+
+    .step-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .step-desc {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Terminal Console */
+    .terminal-container {
+      background: #030712;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 14px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      height: 320px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .log-line {
+      display: flex;
+      gap: 8px;
+      line-height: 1.45;
+    }
+
+    .log-time { color: #64748b; flex-shrink: 0; }
+    .log-info { color: #38bdf8; }
+    .log-success { color: #34d399; }
+    .log-warn { color: #fbbf24; }
+    .log-error { color: #f87171; }
+    .log-dim { color: #94a3b8; }
+
+    /* Token Card */
+    .token-box {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      word-break: break-all;
+    }
+
+    .token-header {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Products Table */
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.25);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      text-align: left;
+    }
+
+    th {
+      background: rgba(255, 255, 255, 0.04);
+      padding: 10px 14px;
+      color: var(--text-muted);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-card);
+    }
+
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr.highlight-row {
+      animation: highlightFlash 2s ease;
+    }
+
+    @keyframes highlightFlash {
+      0% { background: rgba(59, 130, 246, 0.35); }
+      100% { background: transparent; }
+    }
+
+    .price-tag {
+      color: #34d399;
+      font-weight: 600;
+      font-family: var(--font-mono);
+    }
+
+    .stock-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    /* Modal dialog */
+    .toast-notice {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1e293b;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      padding: 14px 20px;
+      color: white;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toast-notice.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header Bar -->
+  <header class="header-bar">
+    <div class="header-title">
+      <span style="font-size: 1.8rem;">📦</span>
+      <div>
+        <h1>SOA Buổi 3: Dịch vụ Quản lý Sản phẩm</h1>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+          Product Management Service (Port 8081) &bull; Auth Service (Port 8080) &bull; CSDL riêng H2
+        </div>
+      </div>
+    </div>
+    <div class="nav-links">
+      <span class="badge-service badge-online"><span class="badge-dot"></span> Auth Service (8080)</span>
+      <span class="badge-service badge-online"><span class="badge-dot"></span> Product Service (8081)</span>
+      <a href="/swagger-ui/index.html" target="_blank" class="btn-link">📖 Swagger UI</a>
+      <a href="/h2-console" target="_blank" class="btn-link">🗄️ H2 Console</a>
+    </div>
+  </header>
+
+  <!-- Controls Panel -->
+  <section class="controls-panel">
+    <div class="control-actions">
+      <button id="btnAutoRun" class="btn-primary" onclick="runAutomatedDemo()">
+        <span>▶️</span> Bắt đầu Chạy Demo Tự Động (Auto-Run)
+      </button>
+      <button class="btn-secondary" onclick="fetchProducts(true)">🔄 Tải lại DS Sản phẩm</button>
+      <button class="btn-secondary" onclick="loginAuthService(true)">🔑 Lấy Token Mới</button>
+      <button class="btn-secondary" onclick="testWithoutToken()">🚫 Test Không Token (401)</button>
+    </div>
+    <div style="font-size: 0.82rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
+      <span>Tốc độ chạy:</span>
+      <select id="runSpeed" style="background: rgba(255,255,255,0.08); color: white; border: 1px solid var(--border-card); padding: 4px 8px; border-radius: 6px; font-size: 0.8rem;">
+        <option value="1200">Bình thường (1.2s)</option>
+        <option value="600">Nhanh (0.6s)</option>
+        <option value="2500">Chậm (2.5s)</option>
+      </select>
+    </div>
+  </section>
+
+  <!-- Main Grid -->
+  <div class="dashboard-grid">
+
+    <!-- Left Column: Stepper & Logs -->
+    <div style="display: flex; flex-direction: column; gap: 24px;">
+
+      <!-- Stepper Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🚀 Các bước kiểm thử liên dịch vụ SOA</div>
+          <span id="demoStatusBadge" style="font-size: 0.75rem; color: var(--text-muted);">Sẵn sàng</span>
+        </div>
+        <div class="steps-container">
+          <div id="step1" class="step-item">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <div class="step-title">
+                <span>Đăng nhập Auth Service (Buổi 2 - Cổng 8080)</span>
+                <span class="step-status"></span>
+              </div>
+              <div class="step-desc">POST /login với tài khoản admin / 123456 để nhận Bearer Token</div>
+            </div>
+          </div>
+
+          <div id="step2" class="step-item">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <div class="step-title">
+                <span>Thử gọi Product Service khi chưa có Token</span>
+                <span class="step-status"></span>
+              </div>
+              <div class="step-desc">Kỳ vọng JwtAuthFilter từ chối với mã 401 Unauthorized</div>
+            </div>
+          </div>
+
+          <div id="step3" class="step-item">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <div class="step-title">
+                <span>Lấy danh sách tất cả sản phẩm (GET /products)</span>
+                <span class="step-status"></span>
+              </div>
+              <div class="step-desc">Product Service gọi sang Auth Service xác thực token rồi lấy dữ liệu từ CSDL riêng</div>
+            </div>
+          </div>
+
+          <div id="step4" class="step-item">
+            <div class="step-number">4</div>
+            <div class="step-content">
+              <div class="step-title">
+                <span>Thêm một sản phẩm mới (POST /products)</span>
+                <span class="step-status"></span>
+              </div>
+              <div class="step-desc">Thêm bàn phím cơ NuPhy Air75 V2 và nhận mã 201 Created</div>
+            </div>
+          </div>
+
+          <div id="step5" class="step-item">
+            <div class="step-number">5</div>
+            <div class="step-content">
+              <div class="step-title">
+                <span>Xem thông tin chi tiết sản phẩm (GET /products/{id})</span>
+                <span class="step-status"></span>
+              </div>
+              <div class="step-desc">Truy vấn chi tiết sản phẩm vừa tạo theo ID</div>
+            </div>
+          </div>
+
+          <div id="step6" class="step-item">
+            <div class="step-number">6</div>
+            <div class="step-content">
+              <div class="step-title">
+                <span>Cập nhật thông tin sản phẩm (PUT /products/{id})</span>
+                <span class="step-status"></span>
+              </div>
+              <div class="step-desc">Cập nhật giá và số lượng, kiểm tra trường updated_at thay đổi</div>
+            </div>
+          </div>
+
+          <div id="step7" class="step-item">
+            <div class="step-number">7</div>
+            <div class="step-content">
+              <div class="step-title">
+                <span>Xóa một sản phẩm (DELETE /products/{id})</span>
+                <span class="step-status"></span>
+              </div>
+              <div class="step-desc">Xóa sản phẩm khỏi CSDL riêng và xác nhận 404 Not Found khi truy vấn lại</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Real-time Terminal Log -->
+      <div class="card" style="flex: 1;">
+        <div class="card-header">
+          <div class="card-title">🖥️ Nhật ký gọi API liên dịch vụ (Live Log)</div>
+          <button onclick="clearTerminal()" style="background: none; border: none; color: var(--text-muted); font-size: 0.75rem; cursor: pointer;">Xóa log</button>
+        </div>
+        <div id="terminal" class="terminal-container">
+          <div class="log-line">
+            <span class="log-time">[00:00:00]</span>
+            <span class="log-info">Sẵn sàng! Nhấn nút 'Bắt đầu Chạy Demo Tự Động' để xem quy trình thực thi...</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Token Info & Live Database Table -->
+    <div style="display: flex; flex-direction: column; gap: 24px;">
+
+      <!-- Active JWT Token Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🔑 Khóa bảo mật JWT Token hiện tại</div>
+          <span id="tokenExpiryBadge" style="font-size: 0.75rem; color: #34d399;">Hạn 1 giờ</span>
+        </div>
+        <div class="token-box">
+          <div class="token-header">
+            <span>Authorization: Bearer Token</span>
+            <span id="tokenLength">Chưa lấy</span>
+          </div>
+          <div id="tokenString" style="color: #cbd5e1;">(Chưa có token. Nhấn chạy demo để tự động lấy từ Buổi 2)</div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.78rem;">
+          <div style="background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 8px;">
+            <span style="color: var(--text-muted);">Người dùng:</span> <strong id="tokenSubject" style="color: #60a5fa;">admin</strong>
+          </div>
+          <div style="background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 8px;">
+            <span style="color: var(--text-muted);">Nguồn cấp:</span> <strong style="color: #c084fc;">Auth Service (Port 8080)</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Products Table Card -->
+      <div class="card" style="flex: 1;">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📦 Dữ liệu Bảng sản phẩm (products)</span>
+            <span id="productCountBadge" class="stock-badge" style="background: rgba(59,130,246,0.2); color: #60a5fa;">0 SP</span>
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">CSDL riêng: H2 Database</span>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 50px;">ID</th>
+                <th>Tên sản phẩm</th>
+                <th>Giá (VNĐ)</th>
+                <th style="width: 70px;">Kho</th>
+                <th>Ngày tạo / Cập nhật</th>
+              </tr>
+            </thead>
+            <tbody id="productTableBody">
+              <tr>
+                <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 24px;">
+                  Đang tải danh sách sản phẩm...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast-notice">
+    <span id="toastIcon">✨</span>
+    <span id="toastMessage">Thông báo</span>
+  </div>
+
+  <script>
+    let currentToken = "";
+    let isRunning = false;
+    let createdDemoId = null;
+
+    function getDelay() {
+      return parseInt(document.getElementById('runSpeed').value) || 1200;
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function logTerminal(message, type = 'info') {
+      const terminal = document.getElementById('terminal');
+      const now = new Date().toTimeString().split(' ')[0];
+      const div = document.createElement('div');
+      div.className = 'log-line';
+
+      let typeClass = 'log-info';
+      if (type === 'success') typeClass = 'log-success';
+      if (type === 'warn') typeClass = 'log-warn';
+      if (type === 'error') typeClass = 'log-error';
+      if (type === 'dim') typeClass = 'log-dim';
+
+      div.innerHTML = `<span class="log-time">[${now}]</span> <span class="${typeClass}">${message}</span>`;
+      terminal.appendChild(div);
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    function clearTerminal() {
+      document.getElementById('terminal').innerHTML = '';
+      logTerminal('Đã xóa log terminal.', 'dim');
+    }
+
+    function showToast(message, icon = '✨') {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMessage').innerText = message;
+      document.getElementById('toastIcon').innerText = icon;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function setStep(stepIndex, status) {
+      const el = document.getElementById('step' + stepIndex);
+      if (!el) return;
+      if (status === 'active') {
+        el.className = 'step-item active';
+        el.querySelector('.step-status').innerHTML = '<span style="color:#60a5fa;">Đang xử lý...</span>';
+      } else if (status === 'completed') {
+        el.className = 'step-item completed';
+        el.querySelector('.step-status').innerHTML = '<span style="color:#34d399;">✓ Thành công</span>';
+      } else if (status === 'error') {
+        el.className = 'step-item';
+        el.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+        el.querySelector('.step-status').innerHTML = '<span style="color:#f87171;">✗ Lỗi</span>';
+      } else {
+        el.className = 'step-item';
+        el.querySelector('.step-status').innerHTML = '';
+      }
+    }
+
+    function renderProducts(products, highlightId = null) {
+      const tbody = document.getElementById('productTableBody');
+      const countBadge = document.getElementById('productCountBadge');
+      countBadge.innerText = `${products.length} SP`;
+
+      if (!products || products.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 24px;">Không có sản phẩm nào.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = products.map(p => {
+        const isHighlight = highlightId && p.id === highlightId ? 'highlight-row' : '';
+        const formattedPrice = new Intl.NumberFormat('vi-VN').format(p.price);
+        const createdAt = p.createdAt ? p.createdAt.replace('T', ' ').substring(0, 19) : '-';
+        const updatedAt = p.updatedAt ? p.updatedAt.replace('T', ' ').substring(0, 19) : '-';
+        return `
+          <tr class="${isHighlight}">
+            <td><strong>#${p.id}</strong></td>
+            <td>
+              <div style="font-weight: 600; color: #f1f5f9;">${p.name}</div>
+              <div style="font-size: 0.72rem; color: #94a3b8; max-width: 260px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.description || ''}</div>
+            </td>
+            <td><span class="price-tag">${formattedPrice} đ</span></td>
+            <td><span class="stock-badge">${p.quantity}</span></td>
+            <td style="font-size: 0.72rem; color: #94a3b8;">
+              <div>Tạo: ${createdAt}</div>
+              <div>Sửa: ${updatedAt}</div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // 1. Đăng nhập Auth Service Buổi 2
+    async function loginAuthService(isManual = false) {
+      logTerminal('Đang gọi API POST /api/auth/login (Auth Service Buổi 2 trên cổng 8080)...', 'info');
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userName: 'admin', password: '123456' })
+        });
+        const data = await res.json();
+        if (data.token) {
+          currentToken = data.token;
+          document.getElementById('tokenString').innerText = currentToken;
+          document.getElementById('tokenLength').innerText = `${currentToken.length} ký tự`;
+          logTerminal(`Đăng nhập Buổi 2 thành công! Đã nhận JWT Token (${currentToken.substring(0, 25)}...)`, 'success');
+          if (isManual) showToast('Đã lấy JWT Token thành công từ Buổi 2!', '🔑');
+          return true;
+        } else {
+          logTerminal(`Đăng nhập thất bại: ${JSON.stringify(data)}`, 'error');
+          return false;
+        }
+      } catch (err) {
+        logTerminal(`Lỗi kết nối tới Auth Service: ${err.message}`, 'error');
+        return false;
+      }
+    }
+
+    // 2. Lấy danh sách sản phẩm
+    async function fetchProducts(isManual = false) {
+      if (!currentToken) {
+        await loginAuthService();
+      }
+      logTerminal('Đang gọi API GET /products (có Bearer Token)...', 'info');
+      try {
+        const res = await fetch('/products', {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        if (res.status === 200) {
+          const list = await res.json();
+          renderProducts(list);
+          logTerminal(`Đã tải ${list.length} sản phẩm từ CSDL riêng của Product Service`, 'success');
+          if (isManual) showToast(`Đã tải ${list.length} sản phẩm`, '📦');
+          return list;
+        } else {
+          const err = await res.json();
+          logTerminal(`Lỗi lấy sản phẩm (${res.status}): ${err.message || ''}`, 'error');
+          return null;
+        }
+      } catch (err) {
+        logTerminal(`Lỗi fetch products: ${err.message}`, 'error');
+        return null;
+      }
+    }
+
+    // 3. Test không Token
+    async function testWithoutToken() {
+      logTerminal('Thử gọi API GET /products KHÔNG gửi Token...', 'warn');
+      try {
+        const res = await fetch('/products');
+        if (res.status === 401) {
+          const body = await res.json();
+          logTerminal(`BỊ CHẶN CHÍNH XÁC: HTTP 401 Unauthorized - ${body.message}`, 'warn');
+          showToast('Đã chặn thành công khi không có Token (401)!', '🛡️');
+          return true;
+        } else {
+          logTerminal(`Không bị chặn: HTTP ${res.status}`, 'error');
+          return false;
+        }
+      } catch (err) {
+        logTerminal(`Lỗi: ${err.message}`, 'error');
+        return false;
+      }
+    }
+
+    // Tự động chạy toàn bộ quy trình demo
+    async function runAutomatedDemo() {
+      if (isRunning) return;
+      isRunning = true;
+      const btn = document.getElementById('btnAutoRun');
+      btn.disabled = true;
+      btn.style.opacity = '0.6';
+      document.getElementById('demoStatusBadge').innerText = 'Đang chạy tự động...';
+
+      // Reset các bước
+      for (let i = 1; i <= 7; i++) setStep(i, 'idle');
+      logTerminal('=== BẮT ĐẦU CHUỖI KIỂM THỬ TỰ ĐỘNG BÀI THỰC HÀNH 3 ===', 'info');
+
+      const delay = getDelay();
+
+      // BƯỚC 1: Đăng nhập
+      setStep(1, 'active');
+      logTerminal('[Bước 1] Yêu cầu sinh Token qua Auth Service Buổi 2 (Port 8080)...', 'info');
+      const loginSuccess = await loginAuthService();
+      await sleep(delay);
+      if (!loginSuccess) {
+        setStep(1, 'error');
+        isRunning = false;
+        btn.disabled = false;
+        return;
+      }
+      setStep(1, 'completed');
+
+      // BƯỚC 2: Thử truy cập không token
+      setStep(2, 'active');
+      logTerminal('[Bước 2] Thử gọi GET /products khi không có Header Authorization...', 'info');
+      await testWithoutToken();
+      await sleep(delay);
+      setStep(2, 'completed');
+
+      // BƯỚC 3: Lấy danh sách sản phẩm có token
+      setStep(3, 'active');
+      logTerminal('[Bước 3] Gọi GET /products kèm Token xác thực qua Buổi 2...', 'info');
+      await fetchProducts();
+      await sleep(delay);
+      setStep(3, 'completed');
+
+      // BƯỚC 4: Thêm mới sản phẩm (POST)
+      setStep(4, 'active');
+      logTerminal('[Bước 4] Gọi POST /products để thêm Bàn phím cơ NuPhy Air75 V2...', 'info');
+      const newProductPayload = {
+        name: "Bàn phím cơ NuPhy Air75 V2 (Demo Live)",
+        description: "Bàn phím cơ low-profile không dây, Switch Cowberry gõ siêu êm",
+        price: 2850000.00,
+        quantity: 20
+      };
+      const postRes = await fetch('/products', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${currentToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newProductPayload)
+      });
+      const postData = await postRes.json();
+      createdDemoId = postData.data ? postData.data.id : null;
+      logTerminal(`POST /products thành công! HTTP 201 Created (ID = ${createdDemoId})`, 'success');
+      showToast(`Đã tạo sản phẩm mới ID = ${createdDemoId}`, '🎉');
+      await fetchProducts();
+      await sleep(delay);
+      setStep(4, 'completed');
+
+      // BƯỚC 5: Xem chi tiết sản phẩm (GET /products/{id})
+      if (createdDemoId) {
+        setStep(5, 'active');
+        logTerminal(`[Bước 5] Gọi GET /products/${createdDemoId} xem chi tiết...`, 'info');
+        const detailRes = await fetch(`/products/${createdDemoId}`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const detailData = await detailRes.json();
+        logTerminal(`GET chi tiết thành công: Tên: "${detailData.name}" - Giá: ${detailData.price}đ`, 'success');
+        await sleep(delay);
+        setStep(5, 'completed');
+
+        // BƯỚC 6: Cập nhật sản phẩm (PUT /products/{id})
+        setStep(6, 'active');
+        logTerminal(`[Bước 6] Gọi PUT /products/${createdDemoId} để cập nhật giá và số lượng...`, 'info');
+        const updatePayload = {
+          name: "Bàn phím cơ NuPhy Air75 V2 (Đã nâng cấp 2026)",
+          price: 3100000.00,
+          quantity: 15
+        };
+        const putRes = await fetch(`/products/${createdDemoId}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${currentToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(updatePayload)
+        });
+        const putData = await putRes.json();
+        logTerminal(`PUT thành công: Giá mới ${putData.data.price}đ - Kho còn ${putData.data.quantity}`, 'success');
+        showToast(`Đã cập nhật sản phẩm ID = ${createdDemoId}`, '✏️');
+        await fetchProducts();
+        await sleep(delay);
+        setStep(6, 'completed');
+
+        // BƯỚC 7: Xóa sản phẩm (DELETE /products/{id})
+        setStep(7, 'active');
+        logTerminal(`[Bước 7] Gọi DELETE /products/${createdDemoId} để xóa khỏi CSDL...`, 'info');
+        const delRes = await fetch(`/products/${createdDemoId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const delData = await delRes.json();
+        logTerminal(`DELETE thành công: ${delData.message}`, 'success');
+        showToast(`Đã xóa sản phẩm ID = ${createdDemoId}`, '🗑️');
+        await fetchProducts();
+        await sleep(delay);
+        setStep(7, 'completed');
+      }
+
+      logTerminal('=== HOÀN TẤT TOÀN BỘ QUY TRÌNH DEMO TỰ ĐỘNG! TẤT CẢ 7 BƯỚC ĐẠT 100% ===', 'success');
+      showToast('Hoàn tất toàn bộ quy trình demo tự động!', '🏆');
+      document.getElementById('demoStatusBadge').innerText = '✓ Hoàn thành 100%';
+      isRunning = false;
+      btn.disabled = false;
+      btn.style.opacity = '1';
+    }
+
+    // Tự động tải dữ liệu và tự động chạy demo để người dùng xem trực quan
+    window.addEventListener('DOMContentLoaded', async () => {
+      logTerminal('Đang kết nối tới Auth Service (Buổi 2)...', 'info');
+      await loginAuthService();
+      await fetchProducts();
+
+      // Tự động bắt đầu chạy chuỗi demo sau 1.5 giây
+      setTimeout(() => {
+        logTerminal('🚀 Tự động khởi chạy Demo trực quan...', 'info');
+        runAutomatedDemo();
+      }, 1500);
+    });
+  </script>
+</body>
+</html>
