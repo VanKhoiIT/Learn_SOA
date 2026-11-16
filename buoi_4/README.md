@@ -121,3 +121,4 @@ Banner xanh báo kết nối thành công với cả Auth Service (8080) và Pro
 Banner vàng cam báo đang chạy chế độ cục bộ giả lập do 2 service trước chưa bật, các chức năng tạo đơn và test vẫn hoạt động bình thường:
 
 ![Che do chay cuc bo fallback](screenshots/01_che_do_chay_cuc_bo_fallback.png)
+
